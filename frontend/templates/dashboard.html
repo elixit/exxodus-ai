@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Lead Generation Dashboard</title>
+    <script>
+        // ✅ Fetches scraped leads and updates the list
+        async function fetchLeads() {
+            try {
+                const response = await fetch('/get-leads');  // ✅ Fetches from `scraper.py`
+                if (!response.ok) throw new Error("Failed to fetch leads");
+
+                const data = await response.json();
+                const leadsList = document.getElementById("leads");
+                leadsList.innerHTML = "";  // Clear the list
+
+                // Loop through leads and display them
+                data.forEach((lead, index) => {
+                    let listItem = document.createElement("li");
+                    listItem.innerHTML = `
+                        <input type="checkbox" id="lead-${index}" value="${lead.name}">
+                        <label for="lead-${index}">${lead.name}</label> 
+                        <span class="contact-status">${lead.contacted ? "✅ Contacted" : "⏳ Not Contacted"}</span>`;
+                    leadsList.appendChild(listItem);
+                });
+            } catch (error) {
+                alert("⚠️ Error fetching leads: " + error.message);
+            }
+        }
+
+        // ✅ Sends a request to `/scrape` to fetch new leads
+        async function scrapeLeads() {
+            const searchQuery = prompt("Enter business type (e.g., marketing agencies):");
+            const location = prompt("Enter location (e.g., New York):");
+
+            if (!searchQuery || !location) {
+                alert("⚠️ Please provide both a search query and location.");
+                return;
+            }
+
+            try {
+                const response = await fetch('/scrape', {
+                    method: "POST",  // ✅ Use POST instead of GET
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ search_query: searchQuery, location: location })
+                });
+
+                const data = await response.json();
+                alert(data.message);  // Show success message
+                fetchLeads();  // Refresh leads after scraping
+            } catch (error) {
+                alert("⚠️ Error scraping leads: " + error.message);
+            }
+        }
+
+        // ✅ Sends outreach request (email, SMS, or call)
+        async function sendOutreach(method) {
+            const selectedLeads = [];
+            document.querySelectorAll("input[type='checkbox']:checked").forEach(checkbox => {
+                selectedLeads.push(checkbox.value);
+            });
+
+            if (selectedLeads.length === 0) {
+                alert("⚠️ Please select at least one lead.");
+                return;
+            }
+
+            const message = document.getElementById("customMessage").value;
+            if (!message.trim()) {
+                alert("⚠️ Please type a message.");
+                return;
+            }
+
+            try {
+                const response = await fetch('/send-outreach', {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ leads: selectedLeads, method: method, message: message })
+                });
+
+                const result = await response.json();
+                alert(result.message);
+                fetchLeads();  // Refresh list after outreach
+            } catch (error) {
+                alert("⚠️ Error sending outreach: " + error.message);
+            }
+        }
+    </script>
+</head>
+<body onload="fetchLeads()">
+    <h1>🚀 AI Lead Generation Dashboard</h1>
+
+    <button onclick="scrapeLeads()">🔍 Scrape New Leads</button>  <!-- ✅ New scraping button -->
+
+    <h3>Your Scraped Leads:</h3>
+    <ul id="leads"></ul>
+    
+    <h3>✍️ Customize Outreach Message</h3>
+    <textarea id="customMessage" placeholder="Type your message here..."></textarea>
+
+    <h3>📩 Outreach Methods</h3>
+    <button onclick="sendOutreach('email')">📧 Email</button>
+    <button onclick="sendOutreach('sms')">📲 SMS</button>
+    <button onclick="sendOutreach('call')">☎️ Call</button>
+</body>
+</html>

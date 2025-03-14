@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Lead Generation Payment</title>
+    <script>
+        async function checkout() {
+            const response = await fetch("/create-checkout-session", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" }
+            });
+
+            const data = await response.json();
+            if (data.checkout_url) {
+                window.location.href = data.checkout_url;  // ✅ Redirects to Stripe checkout
+            } else {
+                alert("Error: " + data.error);
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>AI Lead Generation - Payment</h1>
+    <p>Click the button below to proceed to checkout.</p>
+    
+    <button onclick="checkout()">Pay Now</button>  <!-- ✅ Calls Stripe API -->
+</body>
+</html>

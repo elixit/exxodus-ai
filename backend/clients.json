@@ -1,0 +1,9 @@
+{
+    "client1@example.com": {
+        "password": "hashed_password_here",
+        "leads": [],
+        "outreach_sent": 0,
+        "responses": 0,
+        "payments": 1
+    }
+}

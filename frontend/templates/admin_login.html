@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head><title>Admin Dashboard</title></head>
+<body>
+    <h1>Admin Dashboard</h1>
+    <h2>Total Revenue: {{ revenue }}</h2>
+    <h2>All Clients:</h2>
+    <ul>
+        {% for client, data in clients.items() %}
+            <li>{{ client }} - Leads: {{ data["leads"] | length }}, Payments: {{ data.get("payments", 0) }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
